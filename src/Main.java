@@ -3,7 +3,7 @@ import java.util.Scanner;
 import java.util.SortedMap;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException{
         int numberOfFiles = 0;
 
         while (true) {
@@ -34,7 +34,7 @@ public class Main {
                        int length = line.length();
 
                        if (length > 1024){
-                           throw new RuntimeException("Обнаружена строка " +
+                           throw new LineTooLongException("Обнаружена строка " +
                                    "в файле " + file + " с длинной символов более 1024 (длинна" +
                                    " строки "+ length +")");
                        }
@@ -48,7 +48,7 @@ public class Main {
                        }
                        countLine++;
                    }
-               } catch (RuntimeException e){
+               } catch (LineTooLongException e){
                    System.out.println("\n\nВнимание! Событие с уровнем ERROR: " + e.getMessage());
                }
                 System.out.println("\nОбщее количество строк в файле " + countLine +
