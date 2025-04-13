@@ -1,6 +1,7 @@
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -77,8 +78,10 @@ public class LogEntry {
         this.propertyTwo = matcher.group(3);  // второе свойство
 
 
-        String date = matcher.group(4).substring(1, matcher.group(4).length() - 1);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z");
+        //String date = matcher.group(4).substring(1, matcher.group(4).length() - 1);
+        String date = matcher.group(4);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z", Locale.ENGLISH);
+        System.out.println("Parsing date: " + date);
         ZonedDateTime zonedDateTime = ZonedDateTime.parse(date, formatter);
         this.dataTime = zonedDateTime.toLocalDateTime();  // дата время
 

@@ -1,3 +1,5 @@
+import com.sun.source.tree.CompilationUnitTree;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -26,6 +28,7 @@ public class Main {
                 BufferedReader reader = new BufferedReader(fileReader);
 
                 String line;
+                int count = 0;
 
                 try {
                     while ((line = reader.readLine()) != null) {
