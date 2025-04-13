@@ -10,12 +10,12 @@ public class LogEntry {
     final private String propertyOne;
     final private String propertyTwo;
     final private LocalDateTime dataTime;
-    final private String method;
+    final private HttpMethod method;
     final private String pathRequest;
     final private String httpVersion;
     final private String httpCode;
     final private int sizeDate;
-    final private String pathReferes;
+    final private String pathReferer;
     final private UserAgent userAgent;
 
 
@@ -36,7 +36,7 @@ public class LogEntry {
     }
 
     public String getMethod() {
-        return method;
+        return method.toString();
     }
 
     public String getPathRequest() {
@@ -55,12 +55,12 @@ public class LogEntry {
         return httpVersion;
     }
 
-    public String getPathReferes() {
-        return pathReferes;
+    public String getPathReferer() {
+        return pathReferer;
     }
 
     public String getUserAgent() {
-        return userAgent.getUserAgent();
+        return userAgent.toString();
     }
 
     public LogEntry(String logLine) {
@@ -69,28 +69,22 @@ public class LogEntry {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(logLine);
 
-        if (!matcher.find()) {
-            throw new IllegalArgumentException("Объект создать невозможно, срока не соответствует регулярному выражению " + logLine);
-        }
-
         this.ipAddress = matcher.group(1);  // IP-адрес
         this.propertyOne = matcher.group(2);  // первое свойство
         this.propertyTwo = matcher.group(3);  // второе свойство
 
-
-        //String date = matcher.group(4).substring(1, matcher.group(4).length() - 1);
+        //какая то непонятная дичь с переводом времени
         String date = matcher.group(4);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z", Locale.ENGLISH);
-        System.out.println("Parsing date: " + date);
         ZonedDateTime zonedDateTime = ZonedDateTime.parse(date, formatter);
         this.dataTime = zonedDateTime.toLocalDateTime();  // дата время
 
-        this.method = matcher.group(5);  // метод запроса
+        this.method = HttpMethod.fromString(matcher.group(5));  // метод запроса
         this.pathRequest = matcher.group(6);  // путь запроса
         this.httpVersion = matcher.group(7);  // версия HTTP
         this.httpCode = matcher.group(8);  // код состояния
         this.sizeDate = Integer.parseInt(matcher.group(9));  // размер данных
-        this.pathReferes = matcher.group(10); // Referer путь
+        this.pathReferer = matcher.group(10); // Referer путь
         this.userAgent = new UserAgent(matcher.group(11)); // User-Agent
 
     }

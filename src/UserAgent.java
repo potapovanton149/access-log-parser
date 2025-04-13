@@ -1,46 +1,47 @@
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import nl.basjes.parse.useragent.UserAgentAnalyzer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UserAgent {
-    final private String userAgent;
-    private String typeOs;
-    private String typeBrowser;
+    private static final Logger log = LoggerFactory.getLogger(UserAgent.class);
+    private final String userAgentFull;
+    private final String os;
+    private final String browser;
 
-    public String getUserAgent() {
-        return userAgent;
-    }
+    private static final UserAgentAnalyzer analyzer =
+            UserAgentAnalyzer.newBuilder()
+                    .withCache(1000)
+                    .hideMatcherLoadStats()
+                    .build();
 
-    public String getTypeOs() {
-        return typeOs;
-    }
-
-    public String getTypeBrowser() {
-        return typeBrowser;
-    }
-
-    UserAgent(String userAgent) {
-        this.userAgent = userAgent;
-        this.typeOs = null;
-        this.typeBrowser = null;
-        if (!userAgent.equals("-") && !userAgent.contains("compatible")) {
-            parsing();
+    public UserAgent(String userAgentString) {
+        this.userAgentFull = userAgentString;
+        // если встречается дефис то порождаем пустой объект
+        if ( userAgentString.equals("-")) {
+            this.os = "";
+            this.browser = "";
+        } else {
+            //это я так и не понял как работает, но это подкапотнрое в бибилотеке, так что не интересно
+            nl.basjes.parse.useragent.UserAgent parsed = analyzer.parse(userAgentString);
+            this.browser = parsed.getValue("AgentName");
+            this.os = parsed.getValue("OperatingSystemName");
         }
     }
 
-    private void parsing() {
-        String result = "";
-        String sequence = "OPR";
+    public String getOs() {
+        return os;
+    }
 
-        int lastIndex = userAgent.lastIndexOf(sequence);
-        if (lastIndex != -1) {
-            result = userAgent.substring(0, lastIndex + sequence.length());
-        }
+    public String getUserAgentFull() {
+        return userAgentFull;
+    }
 
-        String regex = "\\((.*?); (\\\\S+)(?=/[^/]*$)";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(result);
+    public String getBrowser() {
+        return browser;
+    }
 
-        this.typeOs = matcher.group(1);
-        this.typeBrowser = matcher.group(2);
+    @Override
+    public String toString() {
+        return userAgentFull;
     }
 }

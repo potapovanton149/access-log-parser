@@ -6,7 +6,7 @@ public class Statistics {
     LocalDateTime minTime;
     LocalDateTime maxTime;
 
-    Statistics() {
+    public Statistics() {
         this.totalTraffic = 0;
         this.maxTime = LocalDateTime.MIN;
         this.minTime = LocalDateTime.now();
