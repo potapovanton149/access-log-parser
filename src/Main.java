@@ -1,13 +1,15 @@
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.SortedMap;
+
 
 public class Main {
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException {
         int numberOfFiles = 0;
+        ArrayList<Request> requestsList = new ArrayList<>();
 
         while (true) {
-            System.out.print("Введите полный путь к файлу:");
+            System.out.print("\n\nВведите полный путь к файлу:");
 
             String path = new Scanner(System.in).nextLine();
             File file = new File(path);
@@ -24,37 +26,46 @@ public class Main {
                 BufferedReader reader = new BufferedReader(fileReader);
 
                 String line;
-                int countLine = 0;
-                int bigLengthLine = reader.readLine().length();
-                int smallLengthLine = reader.readLine().length();
 
+                try {
+                    while ((line = reader.readLine()) != null) {
+                        int length = line.length();
 
-               try {
-                   while ((line = reader.readLine()) != null) {
-                       int length = line.length();
+                        if (length > 1024) {
+                            throw new LineTooLongException("Обнаружена строка " +
+                                    "в файле " + file + " с длинной символов более 1024 (длинна" +
+                                    " строки " + length + ")");
+                        }
+                        requestsList.add(new Request(line));
+                    }
+                } catch (LineTooLongException e) {
+                    System.out.println("\n\nВнимание! Событие с уровнем ERROR: " + e.getMessage());
+                }
 
-                       if (length > 1024){
-                           throw new LineTooLongException("Обнаружена строка " +
-                                   "в файле " + file + " с длинной символов более 1024 (длинна" +
-                                   " строки "+ length +")");
-                       }
+                int countYandex = 0;
+                int countGoogle = 0;
 
-                       if (length > bigLengthLine){
-                           bigLengthLine = length;
-                       }
+                for (Request request : requestsList) {
+                    if (request.getUserAgent().equals("-")) {
+                        continue;
+                    }
 
-                       if (length < smallLengthLine){
-                           smallLengthLine = length;
-                       }
-                       countLine++;
-                   }
-               } catch (LineTooLongException e){
-                   System.out.println("\n\nВнимание! Событие с уровнем ERROR: " + e.getMessage());
-               }
-                System.out.println("\nОбщее количество строк в файле " + countLine +
-                        "\nДлинна самой длинной строки " + bigLengthLine +
-                        "\nДлинна самой короткой строки " + smallLengthLine + "\n");
+                    String userAgent = request.getUserAgent();
+                    int index;
+
+                    if ((index = userAgent.lastIndexOf("YandexBot")) != -1) {
+                        countYandex++;
+                        continue;
+                    }
+
+                    if ((index = userAgent.lastIndexOf("Googlebot")) != -1) {
+                        countGoogle++;
+                    }
+
+                }
+                System.out.printf("\nВ log файле количество запросов от YandexBot равна %s, от Googlebot равна %s", countYandex, countGoogle);
             }
         }
     }
 }
+// /home/anton/Рабочий стол/access.log
