@@ -1,3 +1,6 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -6,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LogEntry {
+    private static final Logger log = LoggerFactory.getLogger(LogEntry.class);
     final private String ipAddress;
     final private String propertyOne;
     final private String propertyTwo;
@@ -18,74 +22,47 @@ public class LogEntry {
     final private String pathReferer;
     final private UserAgent userAgent;
 
-
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    public LocalDateTime getDataTime() {
-        return dataTime;
-    }
-
-    public String getPropertyTwo() {
-        return propertyTwo;
-    }
-
-    public String getPropertyOne() {
-        return propertyOne;
-    }
-
-    public String getMethod() {
-        return method.toString();
-    }
-
-    public String getPathRequest() {
-        return pathRequest;
-    }
-
-    public String getHttpCode() {
-        return httpCode;
-    }
-
-    public int getSizeDate() {
-        return sizeDate;
-    }
-
-    public String getHttpVersion() {
-        return httpVersion;
-    }
-
-    public String getPathReferer() {
-        return pathReferer;
-    }
-
-    public String getUserAgent() {
-        return userAgent.toString();
-    }
-
     public LogEntry(String logLine) {
-        //тяжелая регулярка
-        String regex = "^(\\S+) (\\S+) (\\S+) \\[(.*?)\\] \"(\\S+) (\\S+) (\\S+)\" (\\d+) (\\d+) \"(.*?)\" \"(.*?)\"$";
+        //дичайшая регулярка
+        String regex = "^(?<ip>\\S+) (?<prop1>\\S+) (?<prop2>\\S+) \\[(?<time>[^\\]]+)\\] " +
+                "\"(?<method>\\S+) (?<path>[^ ]+) (?<protocol>\\S+)\" " +
+                "(?<status>\\d+) (?<size>\\d+) " +
+                "\"(?<referer>[^\"]*)\" \"(?<userAgent>[^\"]*)\"";
+
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(logLine);
 
-        this.ipAddress = matcher.group(1);  // IP-адрес
-        this.propertyOne = matcher.group(2);  // первое свойство
-        this.propertyTwo = matcher.group(3);  // второе свойство
+        if (!matcher.find()) {
+            throw new IllegalArgumentException("ERROR! Неверный формат строки: " + logLine);
+        }
 
-        //какая то непонятная дичь с переводом времени
-        String date = matcher.group(4);
+        this.ipAddress = matcher.group("ip");
+        this.propertyOne = matcher.group("prop1");
+        this.propertyTwo = matcher.group("prop2");
+
+        // Парсинг даты и времени
+        String date = matcher.group("time");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z", Locale.ENGLISH);
-        ZonedDateTime zonedDateTime = ZonedDateTime.parse(date, formatter);
-        this.dataTime = zonedDateTime.toLocalDateTime();  // дата время
+        this.dataTime = ZonedDateTime.parse(date, formatter).toLocalDateTime();
 
-        this.method = HttpMethod.fromString(matcher.group(5));  // метод запроса
-        this.pathRequest = matcher.group(6);  // путь запроса
-        this.httpVersion = matcher.group(7);  // версия HTTP
-        this.httpCode = matcher.group(8);  // код состояния
-        this.sizeDate = Integer.parseInt(matcher.group(9));  // размер данных
-        this.pathReferer = matcher.group(10); // Referer путь
-        this.userAgent = new UserAgent(matcher.group(11)); // User-Agent
-
+        this.method = HttpMethod.fromString(matcher.group("method"));
+        this.pathRequest = matcher.group("path");
+        this.httpVersion = matcher.group("protocol");
+        this.httpCode = matcher.group("status");
+        this.sizeDate = Integer.parseInt(matcher.group("size"));
+        this.pathReferer = matcher.group("referer");
+        this.userAgent = new UserAgent(matcher.group("userAgent"));
     }
+
+    public String getIpAddress() { return ipAddress; }
+    public LocalDateTime getDataTime() { return dataTime; }
+    public String getPropertyTwo() { return propertyTwo; }
+    public String getPropertyOne() { return propertyOne; }
+    public String getMethod() { return method.toString(); }
+    public String getPathRequest() { return pathRequest; }
+    public String getHttpCode() { return httpCode; }
+    public int getSizeDate() { return sizeDate; }
+    public String getHttpVersion() { return httpVersion; }
+    public String getPathReferer() { return pathReferer; }
+    public String getUserAgent() { return userAgent.toString(); }
 }

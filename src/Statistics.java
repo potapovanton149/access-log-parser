@@ -2,25 +2,24 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class Statistics {
-    int totalTraffic;
+    long totalTraffic;
     LocalDateTime minTime;
     LocalDateTime maxTime;
 
     public Statistics() {
         this.totalTraffic = 0;
         this.maxTime = LocalDateTime.MIN;
-        this.minTime = LocalDateTime.now();
+        this.minTime = LocalDateTime.MAX;
     }
 
     public void addEntry(LogEntry logEntry) {
         totalTraffic += logEntry.getSizeDate();
 
-        if (logEntry.getDataTime().isAfter((maxTime))) {
-            maxTime = logEntry.getDataTime();
-        }
-
-        if (logEntry.getDataTime().isAfter((maxTime))) {
+        if (logEntry.getDataTime().isBefore(minTime)) {
             minTime = logEntry.getDataTime();
+        }
+        if (logEntry.getDataTime().isAfter(maxTime)) {
+            maxTime = logEntry.getDataTime();
         }
     }
 
