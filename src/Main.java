@@ -6,7 +6,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) throws IOException {
         int numberOfFiles = 0;
-        ArrayList<Request> requestsList = new ArrayList<>();
+        ArrayList<LogEntry> requestsList = new ArrayList<>();
 
         while (true) {
             System.out.print("\n\nВведите полный путь к файлу:");
@@ -36,7 +36,7 @@ public class Main {
                                     "в файле " + file + " с длинной символов более 1024 (длинна" +
                                     " строки " + length + ")");
                         }
-                        requestsList.add(new Request(line));
+                        requestsList.add(new LogEntry(line));
                     }
                 } catch (LineTooLongException e) {
                     System.out.println("\n\nВнимание! Событие с уровнем ERROR: " + e.getMessage());
@@ -45,12 +45,12 @@ public class Main {
                 int countYandex = 0;
                 int countGoogle = 0;
 
-                for (Request request : requestsList) {
-                    if (request.getUserAgent().equals("-")) {
+                for (LogEntry logEntry : requestsList) {
+                    if (logEntry.getUserAgent().equals("-")) {
                         continue;
                     }
 
-                    String userAgent = request.getUserAgent();
+                    String userAgent = logEntry.getUserAgent();
                     int index;
 
                     if ((index = userAgent.lastIndexOf("YandexBot")) != -1) {
