@@ -6,7 +6,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) throws IOException {
         int numberOfFiles = 0;
-        ArrayList<LogEntry> requestsList = new ArrayList<>();
+        ArrayList<LogEntry> entriesList = new ArrayList<>();
 
         while (true) {
             System.out.print("\n\nВведите полный путь к файлу:");
@@ -36,34 +36,19 @@ public class Main {
                                     "в файле " + file + " с длинной символов более 1024 (длинна" +
                                     " строки " + length + ")");
                         }
-                        requestsList.add(new LogEntry(line));
+                        try {
+                            LogEntry entry = new LogEntry(line);
+                            entriesList.add(entry);
+                        } catch (IllegalArgumentException e) {
+                            System.err.println("Неизвестная ошибка при парсинге строки: " + e.getMessage());
+                        }
+
+
+                        entriesList.add(new LogEntry(line));
                     }
                 } catch (LineTooLongException e) {
                     System.out.println("\n\nВнимание! Событие с уровнем ERROR: " + e.getMessage());
                 }
-
-                int countYandex = 0;
-                int countGoogle = 0;
-
-                for (LogEntry logEntry : requestsList) {
-                    if (logEntry.getUserAgent().equals("-")) {
-                        continue;
-                    }
-
-                    String userAgent = logEntry.getUserAgent();
-                    int index;
-
-                    if ((index = userAgent.lastIndexOf("YandexBot")) != -1) {
-                        countYandex++;
-                        continue;
-                    }
-
-                    if ((index = userAgent.lastIndexOf("Googlebot")) != -1) {
-                        countGoogle++;
-                    }
-
-                }
-                System.out.printf("\nВ log файле количество запросов от YandexBot равна %s, от Googlebot равна %s", countYandex, countGoogle);
             }
         }
     }

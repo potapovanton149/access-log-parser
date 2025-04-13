@@ -62,11 +62,15 @@ public class LogEntry {
         return userAgent.getUserAgent();
     }
 
-    LogEntry(String logLine) {
+    public LogEntry(String logLine) {
         //тяжелая регулярка
-        String regex = "^([\\d.]+) (\\S+) (\\S+) \\[([^\\]]+)\\] \"(\\S+) (\\S+) (\\S+)\" (\\d+) (\\d+) \"([^\"]*)\" \"([^\"]*)\"$";
+        String regex = "^(\\S+) (\\S+) (\\S+) \\[(.*?)\\] \"(\\S+) (\\S+) (\\S+)\" (\\d+) (\\d+) \"(.*?)\" \"(.*?)\"$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(logLine);
+
+        if (!matcher.find()) {
+            throw new IllegalArgumentException("Объект создать невозможно, срока не соответствует регулярному выражению " + logLine);
+        }
 
         this.ipAddress = matcher.group(1);  // IP-адрес
         this.propertyOne = matcher.group(2);  // первое свойство
