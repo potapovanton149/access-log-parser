@@ -2,11 +2,11 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-
 public class Main {
     public static void main(String[] args) throws IOException {
         int numberOfFiles = 0;
-        ArrayList<Request> requestsList = new ArrayList<>();
+        ArrayList<LogEntry> entriesList = new ArrayList<>();
+        Statistics statistics = new Statistics();
 
         while (true) {
             System.out.print("\n\nВведите полный путь к файлу:");
@@ -26,44 +26,31 @@ public class Main {
                 BufferedReader reader = new BufferedReader(fileReader);
 
                 String line;
+                int count = 0;
 
                 try {
                     while ((line = reader.readLine()) != null) {
                         int length = line.length();
 
                         if (length > 1024) {
-                            throw new LineTooLongException("Обнаружена строка " +
+                            throw new LineTooLongException("ERROR! Обнаружена строка " +
                                     "в файле " + file + " с длинной символов более 1024 (длинна" +
                                     " строки " + length + ")");
                         }
-                        requestsList.add(new Request(line));
+                        try {
+                            LogEntry entry = new LogEntry(line);
+                            entriesList.add(entry);
+                        } catch (IllegalArgumentException e) {
+                            System.out.println("ERROR! Неизвестная ошибка при парсинге строки: " + e.getMessage());
+                        }
+                        LogEntry logEntry = new LogEntry(line);
+                        entriesList.add(logEntry);
+                        statistics.addEntry(logEntry);
                     }
                 } catch (LineTooLongException e) {
-                    System.out.println("\n\nВнимание! Событие с уровнем ERROR: " + e.getMessage());
+                    System.out.println("\n\nERROR! " + e.getMessage());
                 }
-
-                int countYandex = 0;
-                int countGoogle = 0;
-
-                for (Request request : requestsList) {
-                    if (request.getUserAgent().equals("-")) {
-                        continue;
-                    }
-
-                    String userAgent = request.getUserAgent();
-                    int index;
-
-                    if ((index = userAgent.lastIndexOf("YandexBot")) != -1) {
-                        countYandex++;
-                        continue;
-                    }
-
-                    if ((index = userAgent.lastIndexOf("Googlebot")) != -1) {
-                        countGoogle++;
-                    }
-
-                }
-                System.out.printf("\nВ log файле количество запросов от YandexBot равна %s, от Googlebot равна %s", countYandex, countGoogle);
+                System.out.printf("\nОбщий объем часового трафика из файла: %s", statistics.totalTraffic);
             }
         }
     }
