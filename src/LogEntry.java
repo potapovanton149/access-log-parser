@@ -23,7 +23,6 @@ public class LogEntry {
     final private UserAgent userAgent;
 
     public LogEntry(String logLine) {
-        //дичайшая регулярка
         String regex = "^(?<ip>\\S+) (?<prop1>\\S+) (?<prop2>\\S+) \\[(?<time>[^\\]]+)\\] " +
                 "\"(?<method>\\S+) (?<path>[^ ]+) (?<protocol>\\S+)\" " +
                 "(?<status>\\d+) (?<size>\\d+) " +
@@ -64,5 +63,5 @@ public class LogEntry {
     public int getSizeDate() { return sizeDate; }
     public String getHttpVersion() { return httpVersion; }
     public String getPathReferer() { return pathReferer; }
-    public String getUserAgent() { return userAgent.toString(); }
+    public UserAgent getUserAgent() { return userAgent; }
 }

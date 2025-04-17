@@ -16,12 +16,10 @@ public class UserAgent {
 
     public UserAgent(String userAgentString) {
         this.userAgentFull = userAgentString;
-        // если встречается дефис то порождаем пустой объект
         if ( userAgentString.equals("-")) {
             this.os = "";
             this.browser = "";
         } else {
-            //это я так и не понял как работает, но это подкапотнрое в бибилотеке, так что не интересно
             nl.basjes.parse.useragent.UserAgent parsed = analyzer.parse(userAgentString);
             this.browser = parsed.getValue("AgentName");
             this.os = parsed.getValue("OperatingSystemName");

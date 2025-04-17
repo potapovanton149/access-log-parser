@@ -50,7 +50,10 @@ public class Main {
                 } catch (LineTooLongException e) {
                     System.out.println("\n\nERROR! " + e.getMessage());
                 }
-                System.out.printf("\nОбщий объем часового трафика из файла: %s", statistics.totalTraffic);
+                System.out.printf("\n\nОбщий объем часового трафика из файла: %s", statistics.getTrafficRate());
+                System.out.println("\nСтитистика по операционным система: " + statistics.getCountsOS());
+                System.out.println("\nСтатистика по ОС в долях " + statistics.getStatsOS());
+                //System.out.println("\n Список всех существующих страниц сайта " + statistics.getSitePages());
             }
         }
     }
