@@ -48,10 +48,9 @@ public class Main {
             } catch (LineTooLongException e) {
                 System.out.println("\n\nERROR! " + e.getMessage());
             }
-            System.out.printf("\n\nОбщий объем часового трафика из файла: %s", statistics.getTrafficRate());
-            System.out.println("\nСтитистика по операционным система: " + statistics.getInfoCountsOS());
-            System.out.println("\nСтатистика по ОС в долях " + statistics.getInfoStatsOS());
-            //System.out.println("\n Список всех существующих страниц сайта " + statistics.getSitePages());
+            System.out.println("\nСтатистика по барузерам: " + statistics.getInfoCountsBrowser());
+            System.out.println("\nСтатистика по браузерам в долях " + statistics.getInfoStatsBrowser());
+            //System.out.println("\n Список всех страниц сайта с кодом 404" + statistics.getSitePagesNotFound());
         }
     }
 }
