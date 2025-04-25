@@ -1,6 +1,5 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -49,7 +48,13 @@ public class Main {
                 System.out.println("\n\nERROR! " + e.getMessage());
             }
             System.out.println("\nСтатистика по барузерам: " + statistics.getInfoCountsBrowser());
-            System.out.println("\nСтатистика по браузерам в долях " + statistics.getInfoStatsBrowser());
+            System.out.print("\nСтатистика по браузерам в долях {");
+
+            HashMap<String, Double> stat = statistics.getInfoStatsBrowser();
+            for (Map.Entry<String, Double> entry : stat.entrySet()) {
+                System.out.print(entry.getKey() + "=" + String.format("%.10f", entry.getValue()) + ", ");
+            }
+            System.out.print("}");
             //System.out.println("\n Список всех страниц сайта с кодом 404" + statistics.getSitePagesNotFound());
         }
     }

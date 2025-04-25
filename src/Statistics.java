@@ -24,6 +24,7 @@ public class Statistics {
     }
 
     public HashMap<String, Double> getInfoStatsOS() {
+
         return infoStatsOS;
     }
 
@@ -124,10 +125,8 @@ public class Statistics {
         }
         for (Map.Entry<String, Integer> entry : infoCountsBrowser.entrySet()) {
             double d = (double) entry.getValue() / totalCountBrowser;
-            infoStatsBrowser.put(entry.getKey(), Math.round(d * 100000.0) / 100000.0);
+            infoStatsBrowser.put(entry.getKey(), d);
         }
-
-
     }
 
     //подсчет среднего трафика за час
