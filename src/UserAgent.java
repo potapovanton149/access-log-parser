@@ -6,7 +6,8 @@ public class UserAgent {
     private static final Logger log = LoggerFactory.getLogger(UserAgent.class);
     private final String userAgentFull; //полная строка user agent
     private final String os; //тип операционной системы
-    private final String browser; //тип браузера
+    private final String browser;//тип браузера
+    private final boolean signBot;
 
     //инициализируем анализатор user agent
     private static final UserAgentAnalyzer analyzer =
@@ -21,10 +22,12 @@ public class UserAgent {
         if ( userAgentString.equals("-")) {
             this.os = "";
             this.browser = "";
+            this.signBot = false;
         } else {
             nl.basjes.parse.useragent.UserAgent parsed = analyzer.parse(userAgentString);
             this.browser = parsed.getValue("AgentName");
             this.os = parsed.getValue("OperatingSystemName");
+            this.signBot = getUserAgentFull().contains("bot");
         }
     }
 
@@ -38,6 +41,10 @@ public class UserAgent {
 
     public String getBrowser() {
         return browser;
+    }
+
+    public boolean getSignBot() {
+        return signBot;
     }
 
     @Override

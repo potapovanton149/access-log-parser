@@ -19,7 +19,7 @@ public class Main {
         if (!fileExists || isDirectory) {
             System.out.println("Указанный файл не существует или указанный путь является путём к папке");
         } else {
-            System.out.print("\nПуть к файлу указан верно.");
+            System.out.print("\nПуть к файлу указан верно. Ожидайте подсчета статистических данных.");
 
             FileReader fileReader = new FileReader(path);
             BufferedReader reader = new BufferedReader(fileReader);
@@ -47,7 +47,9 @@ public class Main {
             } catch (LineTooLongException e) {
                 System.out.println("\n\nERROR! " + e.getMessage());
             }
-            System.out.println("\nСреднее количество посещений в час: " + statistics.getVisitsAverageHour()) ;
+            System.out.println("\nСреднее количество посещений в час: " + statistics.getVisitsAverageHour());
+            System.out.println("\nСреднее количество ошибочных запросов в час: " + statistics.getRequestsFailedAverageHour());
+            System.out.println(("\nСредняя посещаемость одни пользователем: " + statistics.getAverageUserTraffic()));
         }
     }
 }
