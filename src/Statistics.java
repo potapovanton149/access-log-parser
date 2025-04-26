@@ -106,7 +106,7 @@ public class Statistics {
 
         //берем из user agent браузер и если значение не пустое +1 к мапе ОС
         String browser = logEntry.getUserAgent().getBrowser();
-        if (os.isEmpty()) {
+        if (browser.isEmpty()) {
             if (!infoCountsBrowser.containsKey("empty")) {
                 infoCountsBrowser.put("empty", 1);
             } else {
@@ -131,6 +131,9 @@ public class Statistics {
 
     //подсчет среднего трафика за час
     public double getTrafficRate() {
+        if (minTime.equals(maxTime)) {
+            throw new IllegalArgumentException("ERROR! Максимальное и минимальное время идентичны, невозможно вычислить средний трафик в час.");
+        }
         long hours = Duration.between(minTime, maxTime).toHours();
         hours = Math.max(1, hours);
         return (double) totalTraffic / hours;
