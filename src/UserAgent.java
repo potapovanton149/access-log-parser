@@ -1,19 +1,21 @@
-import nl.basjes.parse.useragent.UserAgentAnalyzer;
+import nl.basjes.parse.useragent.UserAgentAnalyzer; // импорт сработал только так. Почему? хз
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class UserAgent {
     private static final Logger log = LoggerFactory.getLogger(UserAgent.class);
-    private final String userAgentFull;
-    private final String os;
-    private final String browser;
+    private final String userAgentFull; //полная строка user agent
+    private final String os; //тип операционной системы
+    private final String browser; //тип браузера
 
+    //инициализируем анализатор user agent
     private static final UserAgentAnalyzer analyzer =
             UserAgentAnalyzer.newBuilder()
                     .withCache(1000)
                     .hideMatcherLoadStats()
                     .build();
 
+    //конструктор инициализирует объект "пустым" если userAgent в строке отсутствует
     public UserAgent(String userAgentString) {
         this.userAgentFull = userAgentString;
         if ( userAgentString.equals("-")) {

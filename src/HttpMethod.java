@@ -11,6 +11,10 @@ public enum HttpMethod {
     UNKNOWN;
 
     public static HttpMethod fromString(String method) {
-        return HttpMethod.valueOf(method.toUpperCase());
+       try {
+           return HttpMethod.valueOf(method.toUpperCase());
+       } catch (IllegalArgumentException e){
+           return HttpMethod.UNKNOWN;
+       }
     }
 }

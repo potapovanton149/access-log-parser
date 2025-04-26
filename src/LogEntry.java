@@ -9,20 +9,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LogEntry {
-    private static final Logger log = LoggerFactory.getLogger(LogEntry.class);
-    final private String ipAddress;
-    final private String propertyOne;
-    final private String propertyTwo;
-    final private LocalDateTime dataTime;
-    final private HttpMethod method;
-    final private String pathRequest;
-    final private String httpVersion;
-    final private String httpCode;
-    final private int sizeDate;
-    final private String pathReferer;
-    final private UserAgent userAgent;
+    final private String ipAddress; //ip адрес
+    final private String propertyOne; //первое свойство
+    final private String propertyTwo; //второе свойство
+    final private LocalDateTime dataTime; //время и дата
+    final private HttpMethod method; //метод http запроса
+    final private String pathRequest; // путь запроса
+    final private String httpVersion; //версия http
+    final private String httpCode; // код состояния http
+    final private int sizeDate; //размер данных
+    final private String pathReferer; // рефер путь
+    final private UserAgent userAgent; // инфо о user agent
 
     public LogEntry(String logLine) {
+        //парсим строку регуляркой
         String regex = "^(?<ip>\\S+) (?<prop1>\\S+) (?<prop2>\\S+) \\[(?<time>[^\\]]+)\\] " +
                 "\"(?<method>\\S+) (?<path>[^ ]+) (?<protocol>\\S+)\" " +
                 "(?<status>\\d+) (?<size>\\d+) " +
