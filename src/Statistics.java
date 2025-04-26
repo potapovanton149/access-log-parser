@@ -18,6 +18,8 @@ public class Statistics {
     private final HashMap<String, Double> infoStatsOS; //статистика по ОС и значение долей
     private final HashMap<String, Integer> infoCountsBrowser; //статистика по браузерам и количеству
     private final HashMap<String, Double> infoStatsBrowser; //статистика по браузерам и значение долей
+    private int coutRequestsbot; //общее количество запросов в логе от ботов
+    private int coutRequest; //общее количество общих запросов
 
     public HashMap<String, Integer> getInfoCountsOS() {
         return infoCountsOS;
@@ -58,11 +60,21 @@ public class Statistics {
         this.sitePagesNotFound = new HashSet<>();
         this.infoCountsBrowser = new HashMap<>();
         this.infoStatsBrowser = new HashMap<>();
+        this.coutRequestsbot = 0;
     }
 
     public void addEntry(LogEntry logEntry) {
+        //считаем количество общих запросов
+        coutRequest++;
+
         //считаем объем каждого запроса и суммируем
         totalTraffic += logEntry.getSizeDate();
+
+
+        //прибавляем счетчик количества запросов ботов если в userAgent есть слово bot
+        if (logEntry.getUserAgent().getUserAgentFull().contains("bot")){
+            coutRequestsbot++;
+        }
 
         //указываем минимальное и максимальное время запроса в логе
         if (logEntry.getDataTime().isBefore(minTime)) {
@@ -130,9 +142,16 @@ public class Statistics {
     }
 
     //подсчет среднего трафика за час
-    public double getTrafficRate() {
+    public double getTrafficAverage() {
         long hours = Duration.between(minTime, maxTime).toHours();
         hours = Math.max(1, hours);
         return (double) totalTraffic / hours;
+    }
+
+    //подсчет среднего количества посещений в час
+    public double getVisitsAverageHour(){
+        long hours = Duration.between(minTime, maxTime).toHours();
+        hours = Math.max(1, hours);
+        return (double) Math.round((coutRequest - coutRequestsbot) / hours);
     }
 }
