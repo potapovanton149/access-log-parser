@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class Statistics {
-    private static final Logger log = LoggerFactory.getLogger(Statistics.class);
     private long totalTraffic; //общая сумма трафика данных
     private LocalDateTime minTime; //минимальное время из лога
     private LocalDateTime maxTime; //максимальное время из лога
@@ -18,6 +17,11 @@ public class Statistics {
     private final HashMap<String, Double> infoStatsOS; //статистика по ОС и значение долей
     private final HashMap<String, Integer> infoCountsBrowser; //статистика по браузерам и количеству
     private final HashMap<String, Double> infoStatsBrowser; //статистика по браузерам и значение долей
+    private int countRequestsBot; //общее количество запросов в логе от ботов
+    private int countRequestsGeneral; //общее количество общих запросов
+    private int countRequestsBad; // общее количество запросов с кодом состояния 4**
+    private int countRequestsServerError; // общее количество запросов с кодом состояния 5**
+    private final HashSet<String> uniqueUserIP; //множество уникальных ip адресов пользователей
 
     public HashMap<String, Integer> getInfoCountsOS() {
         return infoCountsOS;
@@ -58,11 +62,37 @@ public class Statistics {
         this.sitePagesNotFound = new HashSet<>();
         this.infoCountsBrowser = new HashMap<>();
         this.infoStatsBrowser = new HashMap<>();
+        this.countRequestsBot = 0;
+        this.countRequestsGeneral = 0;
+        this.countRequestsBad = 0;
+        this.countRequestsServerError = 0;
+        this.uniqueUserIP = new HashSet<>();
     }
 
     public void addEntry(LogEntry logEntry) {
+        //считаем количество общих запросов
+        countRequestsGeneral++;
+
         //считаем объем каждого запроса и суммируем
         totalTraffic += logEntry.getSizeDate();
+
+        //считаем общее количество запросов с кодом состояния 4**
+        if (logEntry.getHttpCode().matches("^4\\d{2}$")) {
+            countRequestsBad++;
+        }
+
+        //считаем общее количество запросов с кодом состояния 5**
+        if (logEntry.getHttpCode().matches("^5\\d{2}$")) {
+            countRequestsServerError++;
+        }
+
+        //добавляем ip адреса, но в множество попадут только уникальные
+        uniqueUserIP.add(logEntry.getIpAddress());
+
+        //прибавляем счетчик количества запросов ботов если в userAgent есть признак bot
+        if (logEntry.getUserAgent().getSignBot()) {
+            countRequestsBot++;
+        }
 
         //указываем минимальное и максимальное время запроса в логе
         if (logEntry.getDataTime().isBefore(minTime)) {
@@ -137,5 +167,30 @@ public class Statistics {
         long hours = Duration.between(minTime, maxTime).toHours();
         hours = Math.max(1, hours);
         return (double) totalTraffic / hours;
+    }
+
+    //подсчет среднего количества посещений в час
+    public double getVisitsAverageHour() {
+        if (minTime.equals(maxTime)) {
+            throw new IllegalArgumentException("ERROR! Максимальное и минимальное время идентичны, невозможно вычислить среднее количество посещений в час.");
+        }
+        long hours = Duration.between(minTime, maxTime).toHours();
+        hours = Math.max(1, hours);
+        return (double) Math.round((countRequestsGeneral - countRequestsBot) / hours);
+    }
+
+    //подсчет среднего количества ошибочных запросов в час
+    public double getRequestsFailedAverageHour() {
+        if (minTime.equals(maxTime)) {
+            throw new IllegalArgumentException("ERROR! Максимальное и минимальное время идентичны, невозможно вычислить среднее количество ошибочных запросов в час.");
+        }
+        long hours = Duration.between(minTime, maxTime).toHours();
+        hours = Math.max(1, hours);
+        return (double) Math.round((countRequestsBad + countRequestsServerError) / hours);
+    }
+
+    //подсчет средне посещаемости одним пользователем
+    public double getAverageUserTraffic() {
+        return (double) Math.round((countRequestsGeneral - countRequestsBot) / uniqueUserIP.size());
     }
 }

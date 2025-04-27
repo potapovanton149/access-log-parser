@@ -19,7 +19,7 @@ public class Main {
         if (!fileExists || isDirectory) {
             System.out.println("Указанный файл не существует или указанный путь является путём к папке");
         } else {
-            System.out.print("\nПуть к файлу указан верно.");
+            System.out.print("\nПуть к файлу указан верно. Ожидайте подсчета статистических данных.");
 
             FileReader fileReader = new FileReader(path);
             BufferedReader reader = new BufferedReader(fileReader);
@@ -47,15 +47,9 @@ public class Main {
             } catch (LineTooLongException e) {
                 System.out.println("\n\nERROR! " + e.getMessage());
             }
-            System.out.println("\nСтатистика по барузерам: " + statistics.getInfoCountsBrowser());
-            System.out.print("\nСтатистика по браузерам в долях {");
-
-            HashMap<String, Double> stat = statistics.getInfoStatsBrowser();
-            for (Map.Entry<String, Double> entry : stat.entrySet()) {
-                System.out.print(entry.getKey() + "=" + String.format("%.10f", entry.getValue()) + ", ");
-            }
-            System.out.print("}");
-            //System.out.println("\n Список всех страниц сайта с кодом 404" + statistics.getSitePagesNotFound());
+            System.out.println("\nСреднее количество посещений в час: " + statistics.getVisitsAverageHour());
+            System.out.println("\nСреднее количество ошибочных запросов в час: " + statistics.getRequestsFailedAverageHour());
+            System.out.println(("\nСредняя посещаемость одни пользователем: " + statistics.getAverageUserTraffic()));
         }
     }
 }
