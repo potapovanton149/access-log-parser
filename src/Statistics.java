@@ -12,29 +12,52 @@ public class Statistics {
     private long totalTraffic; //общая сумма трафика данных
     private LocalDateTime minTime; //минимальное время из лога
     private LocalDateTime maxTime; //максимальное время из лога
-    private final HashSet<String> sitePages; //список всех страниц из лога
+    private final HashSet<String> sitePagesSuccess; // список всех страниц из лога с кодом 200
+    private final HashSet<String> sitePagesNotFound; // список всех страниц из лога с кодом 404
     private final HashMap<String, Integer> infoCountsOS; //статистика по ОС и количеству
     private final HashMap<String, Double> infoStatsOS; //статистика по ОС и значение долей
+    private final HashMap<String, Integer> infoCountsBrowser; //статистика по браузерам и количеству
+    private final HashMap<String, Double> infoStatsBrowser; //статистика по браузерам и значение долей
 
     public HashMap<String, Integer> getInfoCountsOS() {
         return infoCountsOS;
     }
 
     public HashMap<String, Double> getInfoStatsOS() {
+
         return infoStatsOS;
     }
 
-    public HashSet<String> getSitePages() {
-        return sitePages;
+    public HashSet<String> getSitePagesSuccess() {
+        return sitePagesSuccess;
+    }
+
+    public long getTotalTraffic() {
+        return totalTraffic;
+    }
+
+    public HashSet<String> getSitePagesNotFound() {
+        return sitePagesNotFound;
+    }
+
+    public HashMap<String, Integer> getInfoCountsBrowser() {
+        return infoCountsBrowser;
+    }
+
+    public HashMap<String, Double> getInfoStatsBrowser() {
+        return infoStatsBrowser;
     }
 
     public Statistics() {
         this.totalTraffic = 0;
         this.maxTime = LocalDateTime.MIN;
         this.minTime = LocalDateTime.MAX;
-        this.sitePages = new HashSet<>();
+        this.sitePagesSuccess = new HashSet<>();
         this.infoCountsOS = new HashMap<>();
         this.infoStatsOS = new HashMap<>();
+        this.sitePagesNotFound = new HashSet<>();
+        this.infoCountsBrowser = new HashMap<>();
+        this.infoStatsBrowser = new HashMap<>();
     }
 
     public void addEntry(LogEntry logEntry) {
@@ -49,9 +72,12 @@ public class Statistics {
             maxTime = logEntry.getDataTime();
         }
 
-        //добавляем в лист путь запроса если статус 200
+        //добавляем путь запроса в множества со статусом 200 или 404
         if (logEntry.getHttpCode().equals("200")) {
-            sitePages.add(logEntry.getPathRequest());
+            sitePagesSuccess.add(logEntry.getPathRequest());
+        }
+        if (logEntry.getHttpCode().equals("404")) {
+            sitePagesNotFound.add(logEntry.getPathRequest());
         }
 
         //берем из user agent ОС и если значение не пустое +1 к мапе ОС
@@ -77,10 +103,37 @@ public class Statistics {
             double d = (double) entry.getValue() / totalCountOS;
             infoStatsOS.put(entry.getKey(), Math.round(d * 1000.0) / 1000.0);
         }
+
+        //берем из user agent браузер и если значение не пустое +1 к мапе ОС
+        String browser = logEntry.getUserAgent().getBrowser();
+        if (browser.isEmpty()) {
+            if (!infoCountsBrowser.containsKey("empty")) {
+                infoCountsBrowser.put("empty", 1);
+            } else {
+                infoCountsBrowser.put("empty", infoCountsBrowser.get("empty") + 1);
+            }
+        } else if (!infoCountsBrowser.containsKey(browser)) {
+            infoCountsBrowser.put(browser, 1);
+        } else {
+            infoCountsBrowser.put(browser, infoCountsBrowser.get(browser) + 1);
+        }
+
+        //расчет доли от общего значения числа по каждому браузеру
+        int totalCountBrowser = 0;
+        for (Map.Entry<String, Integer> entry : infoCountsBrowser.entrySet()) {
+            totalCountBrowser += entry.getValue();
+        }
+        for (Map.Entry<String, Integer> entry : infoCountsBrowser.entrySet()) {
+            double d = (double) entry.getValue() / totalCountBrowser;
+            infoStatsBrowser.put(entry.getKey(), d);
+        }
     }
 
     //подсчет среднего трафика за час
     public double getTrafficRate() {
+        if (minTime.equals(maxTime)) {
+            throw new IllegalArgumentException("ERROR! Максимальное и минимальное время идентичны, невозможно вычислить средний трафик в час.");
+        }
         long hours = Duration.between(minTime, maxTime).toHours();
         hours = Math.max(1, hours);
         return (double) totalTraffic / hours;

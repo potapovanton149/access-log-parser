@@ -1,6 +1,5 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -48,10 +47,15 @@ public class Main {
             } catch (LineTooLongException e) {
                 System.out.println("\n\nERROR! " + e.getMessage());
             }
-            System.out.printf("\n\nОбщий объем часового трафика из файла: %s", statistics.getTrafficRate());
-            System.out.println("\nСтитистика по операционным система: " + statistics.getInfoCountsOS());
-            System.out.println("\nСтатистика по ОС в долях " + statistics.getInfoStatsOS());
-            //System.out.println("\n Список всех существующих страниц сайта " + statistics.getSitePages());
+            System.out.println("\nСтатистика по барузерам: " + statistics.getInfoCountsBrowser());
+            System.out.print("\nСтатистика по браузерам в долях {");
+
+            HashMap<String, Double> stat = statistics.getInfoStatsBrowser();
+            for (Map.Entry<String, Double> entry : stat.entrySet()) {
+                System.out.print(entry.getKey() + "=" + String.format("%.10f", entry.getValue()) + ", ");
+            }
+            System.out.print("}");
+            //System.out.println("\n Список всех страниц сайта с кодом 404" + statistics.getSitePagesNotFound());
         }
     }
 }
