@@ -1,13 +1,14 @@
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 public class Statistics {
+    private static final Logger log = LoggerFactory.getLogger(Statistics.class);
     private long totalTraffic; //общая сумма трафика данных
     private LocalDateTime minTime; //минимальное время из лога
     private LocalDateTime maxTime; //максимальное время из лога
@@ -22,6 +23,10 @@ public class Statistics {
     private int countRequestsBad; // общее количество запросов с кодом состояния 4**
     private int countRequestsServerError; // общее количество запросов с кодом состояния 5**
     private final HashSet<String> uniqueUserIP; //множество уникальных ip адресов пользователей
+    private final HashMap<LocalDateTime, Integer> countVisitsPerSecond; //количество посещений сайта в секунду
+    private final HashSet<String> infoAllRefer; //все домены из refer
+    private final HashMap<String, Integer> countRequestsIP; //количество запросов по каждому ip
+
 
     public HashMap<String, Integer> getInfoCountsOS() {
         return infoCountsOS;
@@ -52,6 +57,14 @@ public class Statistics {
         return infoStatsBrowser;
     }
 
+    public HashMap<LocalDateTime, Integer> getCountVisitsPerSecond() {
+        return countVisitsPerSecond;
+    }
+
+    public HashSet<String> getInfoAllRefer() {
+        return infoAllRefer;
+    }
+
     public Statistics() {
         this.totalTraffic = 0;
         this.maxTime = LocalDateTime.MIN;
@@ -67,9 +80,12 @@ public class Statistics {
         this.countRequestsBad = 0;
         this.countRequestsServerError = 0;
         this.uniqueUserIP = new HashSet<>();
+        this.countVisitsPerSecond = new HashMap<>();
+        this.infoAllRefer = new HashSet<>();
+        this.countRequestsIP = new HashMap<>();
     }
 
-    public void addEntry(LogEntry logEntry) {
+    public void addEntry(LogEntry logEntry) throws URISyntaxException {
         //считаем количество общих запросов
         countRequestsGeneral++;
 
@@ -93,6 +109,10 @@ public class Statistics {
         if (logEntry.getUserAgent().getSignBot()) {
             countRequestsBot++;
         }
+
+        //с помощью класса URI сразу берем домен и добавляем во множество доменов refer
+        URI urlRefer = new URI(logEntry.getPathReferer());
+        infoAllRefer.add(urlRefer.getHost());
 
         //указываем минимальное и максимальное время запроса в логе
         if (logEntry.getDataTime().isBefore(minTime)) {
@@ -157,6 +177,23 @@ public class Statistics {
             double d = (double) entry.getValue() / totalCountBrowser;
             infoStatsBrowser.put(entry.getKey(), d);
         }
+
+        //считаем количество запросов по каждому ip без учета ботов
+        String ip = logEntry.getIpAddress();
+        if (!ip.isEmpty() && !logEntry.getUserAgent().getSignBot()) {
+            if (!countRequestsIP.containsKey(browser)) {
+                countRequestsIP.put(ip, 1);
+            } else {
+                countRequestsIP.put(ip, countRequestsIP.get(ip) + 1);
+            }
+        }
+
+        //расчет количества запросов в секунду
+        if (countVisitsPerSecond.containsKey(logEntry.getDataTime())) {
+            countVisitsPerSecond.put(logEntry.getDataTime(), countVisitsPerSecond.get(logEntry.getDataTime()) + 1);
+        } else {
+            countVisitsPerSecond.put(logEntry.getDataTime(), 1);
+        }
     }
 
     //подсчет среднего трафика за час
@@ -192,5 +229,13 @@ public class Statistics {
     //подсчет средне посещаемости одним пользователем
     public double getAverageUserTraffic() {
         return (double) Math.round((countRequestsGeneral - countRequestsBot) / uniqueUserIP.size());
+    }
+
+    //возвращаем ipшник пользака с максимальной посещаемостью
+    public String getMaxUserTraffic() {
+        Optional<Map.Entry<String, Integer>> maxRequestIP = countRequestsIP.entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue());
+        return  maxRequestIP.map(Map.Entry::getKey).orElse(null);
     }
 }

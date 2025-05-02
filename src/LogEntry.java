@@ -1,6 +1,3 @@
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,6 +24,7 @@ public class LogEntry {
                 "\"(?<method>\\S+) (?<path>[^ ]+) (?<protocol>\\S+)\" " +
                 "(?<status>\\d+) (?<size>\\d+) " +
                 "\"(?<referer>[^\"]*)\" \"(?<userAgent>[^\"]*)\"";
+
 
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(logLine);

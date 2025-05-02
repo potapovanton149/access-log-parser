@@ -1,4 +1,5 @@
 import java.io.*;
+import java.net.URISyntaxException;
 import java.util.*;
 
 public class Main {
@@ -42,14 +43,16 @@ public class Main {
                         statistics.addEntry(logEntry);
                     } catch (IllegalArgumentException e) {
                         System.out.println("ERROR! Неизвестная ошибка при парсинге строки: " + e.getMessage());
+                    } catch (URISyntaxException e) {
+                        System.out.println("ERROR! В refer некорректный URL");
                     }
                 }
             } catch (LineTooLongException e) {
                 System.out.println("\n\nERROR! " + e.getMessage());
             }
-            System.out.println("\nСреднее количество посещений в час: " + statistics.getVisitsAverageHour());
-            System.out.println("\nСреднее количество ошибочных запросов в час: " + statistics.getRequestsFailedAverageHour());
-            System.out.println(("\nСредняя посещаемость одни пользователем: " + statistics.getAverageUserTraffic()));
+            System.out.println("\nКоличество посещений пользователей за каждую секунду: " + statistics.getCountVisitsPerSecond());
+            System.out.println("\nВсе домены из рефер: " + statistics.getInfoAllRefer());
+            System.out.println(("\nIP пользователя с самым большим количеством запрсов: " + statistics.getMaxUserTraffic()));
         }
     }
 }
